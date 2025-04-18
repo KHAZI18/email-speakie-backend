@@ -26,16 +26,49 @@ const oauth2Client = new google.auth.OAuth2(
 
 // 🔹 Authentication Route
 // 🔹 Authentication Route
+// app.get("/auth", (req, res) => {
+//     const authUrl = oauth2Client.generateAuthUrl({
+//         access_type: "offline",
+//         scope: [
+//             "https://www.googleapis.com/auth/gmail.readonly",
+//             "https://www.googleapis.com/auth/gmail.modify"  // Add this scope for delete functionality
+//         ],
+//     });
+//     res.redirect(authUrl);
+// });
 app.get("/auth", (req, res) => {
-    const authUrl = oauth2Client.generateAuthUrl({
-        access_type: "offline",
-        scope: [
-            "https://www.googleapis.com/auth/gmail.readonly",
-            "https://www.googleapis.com/auth/gmail.modify"  // Add this scope for delete functionality
-        ],
-    });
-    res.redirect(authUrl);
+    try {
+        console.log("CLIENT_ID:", process.env.CLIENT_ID ? "Set (first 5 chars: " + process.env.CLIENT_ID.substring(0, 5) + "...)" : "Not set");
+        console.log("CLIENT_SECRET:", process.env.CLIENT_SECRET ? "Set (length: " + process.env.CLIENT_SECRET.length + ")" : "Not set");
+        console.log("REDIRECT_URI:", process.env.REDIRECT_URI);
+        
+        const authUrl = oauth2Client.generateAuthUrl({
+            access_type: "offline",
+            scope: [
+                "https://www.googleapis.com/auth/gmail.readonly",
+                "https://www.googleapis.com/auth/gmail.modify"
+            ],
+        });
+        
+        console.log("Generated Auth URL:", authUrl);
+        res.redirect(authUrl);
+    } catch (error) {
+        console.error("Error generating auth URL:", error);
+        res.status(500).send("Error generating authentication URL: " + error.message);
+    }
 });
+
+app.get("/test-oauth-config", (req, res) => {
+    res.json({
+        clientIdSet: Boolean(process.env.CLIENT_ID),
+        clientSecretSet: Boolean(process.env.CLIENT_SECRET),
+        redirectUriSet: process.env.REDIRECT_URI,
+        environment: process.env.NODE_ENV,
+        frontendUrl: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : 'http://localhost:3000'
+    });
+});
+
+
 // Update redirect URI for OAuth
 app.get("/auth/callback", async (req, res) => {
     try {
