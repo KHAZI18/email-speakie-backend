@@ -11,7 +11,7 @@ const app = express();
 app.use(cors({ 
     origin: [
       "http://localhost:3000", // for local development
-      "https://your-frontend-domain.com" // add your deployed frontend URL
+      "https://email-speakie-frontend.onrender.com" // add your deployed frontend URL
     ], 
     credentials: true 
   }));
